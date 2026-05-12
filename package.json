@@ -1,6 +1,8 @@
 {
   "name": "carbon-activado-consultor",
   "version": "1.0.0",
-  "description": "Consultor IA — Proyecto Carbón Activado de Pino Formosa",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "node-fetch": "2.6.9"
+  }
 }
