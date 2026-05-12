@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consultor — Proyecto Carbón Activado</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-dark: #1A2E1A;
+    --green:      #2C5F2D;
+    --green-mid:  #4A7C59;
+    --green-light:#F0F7F0;
+    --gold:       #C8A951;
+    --bg:         #F8FAF8;
+    --surface:    #FFFFFF;
+    --border:     #E2EAE2;
+    --text:       #1C2B1C;
+    --muted:      #6B7B6B;
+    --radius:     12px;
+    --radius-sm:  8px;
+  }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+  body { display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 16px; }
+
+  .app { width: 100%; max-width: 720px; display: flex; flex-direction: column; height: calc(100vh - 32px); }
+
+  /* Header */
+  .header { background: var(--green-dark); border-radius: var(--radius) var(--radius) 0 0; padding: 14px 18px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .avatar i { font-size: 20px; color: #fff; }
+  .hinfo { flex: 1; }
+  .hname { font-weight: 600; font-size: 15px; color: #fff; }
+  .hstatus { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+  .badge { font-size: 11px; background: var(--gold); color: var(--green-dark); padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+
+  /* Chips */
+  .chips { background: var(--surface); border-left: 1px solid var(--border); border-right: 1px solid var(--border); padding: 10px 14px; display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+  .chip { font-size: 11px; padding: 5px 11px; border-radius: 20px; border: 1px solid var(--border); cursor: pointer; color: var(--muted); background: var(--bg); transition: all .15s; white-space: nowrap; }
+  .chip:hover { background: var(--green-light); border-color: var(--green-mid); color: var(--green); }
+
+  /* Messages */
+  .msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--surface); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .msg { display: flex; gap: 10px; align-items: flex-start; max-width: 88%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; font-weight: 600; }
+  .msg.bot .msg-av { background: var(--green); }
+  .msg.bot .msg-av i { color: #fff; font-size: 15px; }
+  .msg.user .msg-av { background: #E8F0FE; color: #1A56C4; }
+  .bubble { padding: 10px 14px; font-size: 13.5px; line-height: 1.6; }
+  .msg.bot .bubble { background: var(--green-light); border: 1px solid #D4E8D4; border-radius: 4px var(--radius) var(--radius) var(--radius); color: var(--text); }
+  .msg.user .bubble { background: var(--green); color: #fff; border-radius: var(--radius) 4px var(--radius) var(--radius); }
+  .bubble strong { font-weight: 600; }
+  .bubble ul, .bubble ol { padding-left: 18px; margin: 6px 0; }
+  .bubble li { margin: 3px 0; }
+  .bubble h3 { font-size: 13px; font-weight: 600; margin: 8px 0 4px; }
+  .bubble p { margin: 4px 0; }
+  .bubble table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 12px; }
+  .bubble th { background: rgba(44,95,45,0.1); padding: 5px 8px; text-align: left; border: 1px solid #D4E8D4; }
+  .bubble td { padding: 5px 8px; border: 1px solid #E2EAE2; }
+
+  /* Typing */
+  .typing { display: flex; gap: 5px; align-items: center; padding: 4px 2px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-mid); animation: bounce .9s infinite; }
+  .dot:nth-child(2) { animation-delay: .2s; }
+  .dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* Input */
+  .input-area { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+  textarea { flex: 1; resize: none; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13.5px; padding: 9px 12px; min-height: 40px; max-height: 120px; font-family: inherit; line-height: 1.5; background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
+  textarea:focus { border-color: var(--green-mid); }
+  .send { width: 40px; height: 40px; border-radius: 50%; background: var(--green); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; }
+  .send:hover { background: var(--green-mid); }
+  .send:disabled { background: var(--border); cursor: default; }
+  .send i { color: #fff; font-size: 17px; }
+
+  /* Welcome card */
+  .welcome { background: var(--green-light); border: 1px solid #C8DFC8; border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 4px; }
+  .welcome h2 { font-size: 14px; color: var(--green); font-weight: 600; margin-bottom: 6px; }
+  .welcome p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+  .kpi { background: #fff; border: 1px solid #D4E8D4; border-radius: var(--radius-sm); padding: 8px 10px; text-align: center; }
+  .kpi-val { font-size: 14px; font-weight: 600; color: var(--green); }
+  .kpi-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* Footer */
+  .footer { text-align: center; font-size: 11px; color: var(--muted); padding: 8px 0 0; flex-shrink: 0; }
+
+  @media (max-width: 480px) {
+    body { padding: 8px; }
+    .app { height: calc(100vh - 16px); }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .chip { font-size: 10px; padding: 4px 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="avatar"><i class="ti ti-leaf"></i></div>
+    <div class="hinfo">
+      <div class="hname">Consultor — Carbón Activado</div>
+      <div class="hstatus">Pino de Formosa · Economía circular · Argentina</div>
+    </div>
+    <span class="badge">Beta</span>
+  </div>
+
+  <div class="chips" id="chips">
+    <span class="chip" onclick="sendChip(this)">¿Cuánto hay que invertir?</span>
+    <span class="chip" onclick="sendChip(this)">¿Qué mercados puedo abastecer?</span>
+    <span class="chip" onclick="sendChip(this)">¿Cómo funciona el proceso?</span>
+    <span class="chip" onclick="sendChip(this)">Costo de producción por tonelada</span>
+    <span class="chip" onclick="sendChip(this)">¿Cuál es el payback?</span>
+    <span class="chip" onclick="sendChip(this)">¿Qué son los créditos de carbono?</span>
+    <span class="chip" onclick="sendChip(this)">Proveedores de equipos</span>
+    <span class="chip" onclick="sendChip(this)">¿Cuánto personal necesito?</span>
+  </div>
+
+  <div class="msgs" id="msgs">
+    <div class="welcome">
+      <h2>Proyecto Carbón Activado de Pino Formosa</h2>
+      <p>Consultame cualquier aspecto del proyecto: proceso técnico, inversión, costos, mercado, compradores, proveedores de equipos o créditos de carbono.</p>
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-val">USD 300k–711k</div><div class="kpi-lbl">Inversión</div></div>
+        <div class="kpi"><div class="kpi-val">74%</div><div class="kpi-lbl">EBITDA</div></div>
+        <div class="kpi"><div class="kpi-val">8–11 meses</div><div class="kpi-lbl">Payback</div></div>
+        <div class="kpi"><div class="kpi-val">100% importado</div><div class="kpi-lbl">Mercado AR hoy</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <textarea id="inp" placeholder="Hacé tu pregunta sobre el proyecto..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();doSend()}"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+    <button class="send" id="sbtn" onclick="doSend()" aria-label="Enviar" disabled>
+      <i class="ti ti-send"></i>
+    </button>
+  </div>
+  <div class="footer">Consultor IA del proyecto · Información con fines orientativos</div>
+</div>
+
+<script>
+const SYSTEM = `Sos el consultor experto del Proyecto Carbón Activado de Pino de Formosa, Argentina. Respondés en español argentino, de forma concisa, técnica y directa. Usá listas y negritas cuando ayude a la claridad. No inventés datos fuera de este brief.
+
+## PROYECTO: Planta de Pirolisis y Carbón Activado — Pino de Formosa
+
+### MATERIA PRIMA
+- Principal: Pino de plantaciones de Formosa con alto contenido de alquitrán. Comprada a terceros: USD 15-40/ton.
+- Respaldo: Madera de desmonte norte de Santa Fe (quebracho, algarrobo). Costo: USD 0.
+- Pino: humedad 25-50%, rendimiento en carbón 25-32%, superficie BET 700-1.000 m²/g, dureza media.
+- Quebracho de respaldo: densidad 1,1-1,3 g/cm³, rendimiento 30-38%, BET 900-1.200 m²/g, dureza alta (apto minería CIP/CIL).
+
+### PROCESO (horno rotativo, 10 ton/día)
+1. Pretratamiento: chipeado 3-20mm + secado hasta <15% humedad.
+2. Pirolisis: horno rotativo 400-750°C, atmósfera inerte. Zonas: secado (150-300°C) → pirolisis (300-600°C) → carbonización (600-750°C). Tambor gira 2-5 rpm.
+3. Gestión gases/alquitrán: ciclón → condensador alquitrán (60-80°C) → scrubber → gas limpio al quemador.
+4. Activación física: vapor H₂O a 850-950°C. Reacción: C + H₂O → CO + H₂. BET resultante: 700-1.000 m²/g.
+5. Post-proceso: enfriamiento indirecto, molienda opcional, envasado.
+
+### MODELO ENERGÉTICO AUTOSUFICIENTE
+- Arranque diario: alquitrán propio → USD 0 desde día 2.
+- Temperatura horno: gas de pirolisis recirculado → USD 0.
+- Electricidad planta: generador a gas de pirolisis → USD 0.
+- Vapor activación: gas de pirolisis → USD 0.
+- COSTO ENERGÉTICO EXTERNO: USD 0 en operación normal.
+
+### DIMENSIONES EQUIPO (10 ton/día)
+- Tambor: Ø 1,0-1,2m, largo 8-12m, peso 15-25 ton.
+- Superficie cubierta: 400-600 m². Patio acopio: 500-1.500 m² adicional.
+- Personal: 9 personas (3 operadores + 3 ayudantes + 1 supervisor + 1 mecánico + 1 jefe de planta).
+
+### LOGÍSTICA DE IMPORTACIÓN
+- Fabricación China: 60-120 días. Embarque: 2-4 contenedores 40 pies.
+- Tránsito marítimo: 35-50 días. Aduana AR: 15-30 días. Montaje: 3-6 semanas.
+- TIEMPO TOTAL: 6 a 9 meses desde la orden de compra.
+
+### INVERSIÓN INICIAL (10 ton/día)
+- Horno + sistema anti-alquitrán FOB China: USD 150k-300k
+- Flete + aduana + transporte interno: USD 35k-136k
+- Obra civil + fundaciones + montaje: USD 20k-50k
+- Pretratamiento (chipeadora + secador): USD 20k-50k
+- Generador a gas: USD 15k-40k
+- Paneles solares: USD 8k-20k
+- Capital de trabajo 3 meses: USD 25k-50k
+- Imprevistos 10%: USD 27k-65k
+- TOTAL: USD 300k-711k instalado en Formosa.
+
+### COSTOS DE PRODUCCIÓN / TONELADA CA
+- Materia prima pino: USD 40-100
+- Personal: USD 55-80
+- Mantenimiento: USD 20-40
+- Laboratorio + logística: USD 28-58
+- Administración: USD 10-25
+- Combustible externo: USD 0
+- Electricidad red: USD 0
+- Amortización equipo 5 años: USD 60-120
+- COSTO TOTAL: USD 213-423/ton CA
+- Precio importado al comprador AR: USD 710-1.130/ton CA
+- Margen de seguridad: costo local 1,7-3,3x menor que el importado.
+
+### RESULTADOS FINANCIEROS (10 ton/día, 770 ton CA/año)
+- Ingresos anuales escenario medio: USD 800k-910k.
+- Costos operativos anuales: USD 172k-250k.
+- EBITDA: USD 590k-660k. Margen EBITDA: 73-74%.
+- Payback: 8-11 meses. TIR 10 años: 100-125%.
+- Punto de equilibrio: USD 270-405/ton (vs importado USD 710+).
+
+### MERCADO ARGENTINO (datos reales importación últimos 12 meses)
+Total importado: 3.905 ton / USD 14,6M CIF. Mercado objetivo con pino Formosa: ~2.050 ton/año.
+Producción del proyecto 770 ton/año = 37% del mercado objetivo.
+Compradores identificados accesibles:
+- DISTRIBUIDORES (923 ton/año, USD 2,00-2,40/kg): Refil SA (561 ton), Ardion SA (198 ton), OVC SA (95 ton), Degonber SA.
+- VITIVINICULTURA (850 ton/año, USD 1,95-3,70/kg): Cepas Argentinas (319 ton), Fecovita (207 ton), Derivados Vínicos (140 ton), Mosto Mat (81 ton), Viña Montpellier (74 ton).
+- ALIMENTOS/GLUCOSA (248 ton/año): Arcor (72 ton), Glucovil Argentina (54 ton), Bioinsumos (62 ton).
+- JUGOS/BEBIDAS (209 ton/año): Natural Juice SA (78 ton), Jugos SA (130 ton).
+NO accesibles con pino (requieren dureza alta para minería): Mansfield Minera (333 ton), Minas Argentinas (128 ton), Minera IRL Patagonia (70 ton). SÍ accesibles con quebracho de respaldo.
+
+### CRÉDITOS DE CARBONO
+- 1 ton biochar → ~2,5-3,5 ton CO₂ eq. secuestradas.
+- 770 ton/año → ~1.900-2.700 ton CO₂/año.
+- Precio mercado voluntario: USD 50-200/ton CO₂.
+- Ingreso adicional potencial: USD 95k-540k/año a partir del año 2.
+- Estándar recomendado: Puro.earth (Beston Group tiene alianza).
+- Plazo certificación: 12-18 meses desde inicio.
+
+### PROVEEDORES DE EQUIPOS
+- Beston Group (bestongroup.com): líder mundial, EPC llave en mano, alianza Puro.earth. RECOMENDADO.
+- Made-in-China.com: múltiples fabricantes, cotización simultánea.
+- Alibaba.com: +368 productos, variedad de precios.
+Siempre exigir: sistema anti-alquitrán para maderas resinosas + generador a gas + garantía extendida.
+
+### HOJA DE RUTA (10 meses)
+Mes 1-2: análisis laboratorio pino + ensayo pirolisis proveedor chino.
+Mes 2-3: RFQ a 3 proveedores + carta intención compradores.
+Mes 3-4: firma contrato EPC + anticipo 30% + habilitaciones ambientales Formosa.
+Mes 4-7: fabricación en China + preparación del predio.
+Mes 7-9: llegada equipo + montaje + técnicos proveedor.
+Mes 10: primera producción comercial.`;
+
+let history = [];
+let busy = false;
+
+document.getElementById('inp').addEventListener('input', function() {
+  document.getElementById('sbtn').disabled = this.value.trim() === '';
+});
+
+function md(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function addMsg(role, text, typing=false) {
+  const msgs = document.getElementById('msgs');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const av = document.createElement('div');
+  av.className = 'msg-av';
+  if (role === 'bot') {
+    av.innerHTML = '<i class="ti ti-leaf"></i>';
+  } else {
+    av.textContent = 'U';
+  }
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  if (typing) {
+    bub.innerHTML = '<div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+    div.id = 'typing-bubble';
+  } else {
+    bub.innerHTML = md(text);
+  }
+  div.appendChild(av);
+  div.appendChild(bub);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return bub;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-bubble');
+  if (t) t.remove();
+}
+
+async function doSend() {
+  if (busy) return;
+  const inp = document.getElementById('inp');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('sbtn').disabled = true;
+  busy = true;
+
+  addMsg('user', text);
+  history.push({ role: 'user', content: text });
+  addMsg('bot', '', true);
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history, system: SYSTEM })
+    });
+    const data = await res.json();
+    const reply = data.reply || 'No pude obtener una respuesta.';
+    history.push({ role: 'assistant', content: reply });
+    removeTyping();
+    addMsg('bot', reply);
+  } catch(e) {
+    removeTyping();
+    addMsg('bot', 'Error al conectar. Por favor intentá de nuevo.');
+  }
+
+  busy = false;
+  document.getElementById('sbtn').disabled = false;
+}
+
+function sendChip(el) {
+  document.getElementById('inp').value = el.textContent;
+  document.getElementById('sbtn').disabled = false;
+  doSend();
+}
+</script>
+</body>
+</html>
